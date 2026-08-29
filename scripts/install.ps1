@@ -55,21 +55,19 @@ if (-not $DownloadSuccess) {
 # 3. Create wrapper batch/cmd script
 Set-Content -Path $TargetCmd -Value "@echo off`r`n`"%~dp0minigit.exe`" %*" -Force
 
-# 4. Permanently update Windows Registry for User PATH and broadcast environment change
-$RegKey = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey("Environment", $true)
-$CurrentRawPath = $RegKey.GetValue("Path", "", [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
+# 4. Clean & Safely Update User PATH in Windows Registry
+$UserPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::User)
+if (-not $UserPath) {
+    $UserPath = ""
+}
 
-# Split and filter out existing occurrences of InstallDir
-$PathParts = $CurrentRawPath -split ";" | Where-Object { $_ -and $_ -ne $InstallDir }
-# Prepend InstallDir to the front
-$NewRawPath = ($InstallDir, $PathParts -join ";").Trim(";")
+# Filter out old/broken entries and clean PATH
+$PathArray = $UserPath -split ";" | Where-Object { $_ -and $_ -ne "System.Object[]" -and $_ -ne $InstallDir }
+$NewPathList = @($InstallDir) + $PathArray
+$CleanUserPath = ($NewPathList -join ";").Trim(";")
 
-# Save back to registry as ExpandString
-$RegKey.SetValue("Path", $NewRawPath, [Microsoft.Win32.RegistryValueKind]::ExpandString)
-$RegKey.Close()
-
-# Also set via .NET Environment as fallback
-[Environment]::SetEnvironmentVariable("Path", $NewRawPath, [EnvironmentVariableTarget]::User)
+# Save permanently
+[Environment]::SetEnvironmentVariable("Path", $CleanUserPath, [EnvironmentVariableTarget]::User)
 
 # 5. Broadcast WM_SETTINGCHANGE message so Windows Explorer and newly spawned shells immediately see the new PATH
 try {
@@ -98,7 +96,7 @@ if ($env:PATH -notlike "*$InstallDir*") {
 
 Write-Host ""
 Write-Host "✔ MiniGit CLI successfully installed to: $TargetExe" -ForegroundColor Green
-Write-Host "✔ PATH environment variable updated permanently in Windows Registry." -ForegroundColor Green
+Write-Host "✔ PATH environment variable updated permanently." -ForegroundColor Green
 Write-Host ""
 Write-Host "You can now run:" -ForegroundColor White
 Write-Host "  minigit help" -ForegroundColor Cyan
