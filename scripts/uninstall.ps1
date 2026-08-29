@@ -54,6 +54,19 @@ public static extern System.IntPtr SendMessageTimeout(
 $SessionPathEntries = $env:PATH -split ";" | Where-Object { $_ -ne $BinDir -and $_ -ne "" }
 $env:PATH = $SessionPathEntries -join ";"
 
+# Remove user data (always removed for clean uninstall)
+$CredFile = [Environment]::GetFolderPath('UserProfile') + "\.minigit_credentials"
+if (Test-Path $CredFile) {
+    Remove-Item -Path $CredFile -Force
+    Write-Host "✔ Removed credentials file" -ForegroundColor Green
+}
+
+$RepoDir = [Environment]::GetFolderPath('UserProfile') + "\.minigit"
+if (Test-Path $RepoDir) {
+    Remove-Item -Path $RepoDir -Recurse -Force
+    Write-Host "✔ Removed repo directory" -ForegroundColor Green
+}
+
 Write-Host ""
 Write-Host "✔ MiniGit CLI has been completely uninstalled." -ForegroundColor Green
 Write-Host "Please restart any open terminal windows." -ForegroundColor White

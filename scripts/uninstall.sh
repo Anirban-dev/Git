@@ -37,3 +37,16 @@ done
 echo ""
 echo -e "${GREEN}✔ MiniGit CLI has been completely uninstalled.${NC}"
 echo -e "Please restart your terminal or open a new tab."
+
+# Remove user data (always removed for clean uninstall)
+CRED_FILE="$HOME/.minigit_credentials"
+if [ -f "$CRED_FILE" ]; then
+    rm -f "$CRED_FILE"
+    echo -e "${GREEN}✔ Removed credentials file${NC}"
+fi
+
+REPO_DIR="$HOME/.minigit"
+if [ -d "$REPO_DIR" ]; then
+    rm -rf "$REPO_DIR"
+    echo -e "${GREEN}✔ Removed repo directory${NC}"
+fi
