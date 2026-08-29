@@ -5,6 +5,7 @@ $Repo = "Anirban-dev/Git"
 $InstallDir = "$env:LOCALAPPDATA\MiniGit\bin"
 $BinaryName = "minigit-windows-x86_64.exe"
 $TargetExe = Join-Path $InstallDir "minigit.exe"
+$TargetCmd = Join-Path $InstallDir "minigit.cmd"
 
 Write-Host "==> Installing MiniGit CLI for Windows..." -ForegroundColor Cyan
 
@@ -51,17 +52,21 @@ if (-not $DownloadSuccess) {
     return
 }
 
-# 3. Add to User PATH environment variable if not already present
+# 3. Create a wrapper batch/cmd script so 'minigit' always invokes minigit.exe even if minigit.py exists in current directory
+Set-Content -Path $TargetCmd -Value "@echo off`r`n`"%~dp0minigit.exe`" %*" -Force
+
+# 4. Add to User PATH environment variable (ensure it's at the FRONT of PATH for priority)
 $UserPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::User)
 if ($UserPath -notlike "*$InstallDir*") {
-    $NewUserPath = "$UserPath;$InstallDir"
+    # Prepend to User PATH
+    $NewUserPath = "$InstallDir;$UserPath"
     [Environment]::SetEnvironmentVariable("Path", $NewUserPath, [EnvironmentVariableTarget]::User)
     Write-Host "==> Added $InstallDir to User PATH." -ForegroundColor Green
 }
 
 # Update current session PATH so minigit works immediately in this window
 if ($env:PATH -notlike "*$InstallDir*") {
-    $env:PATH = "$env:PATH;$InstallDir"
+    $env:PATH = "$InstallDir;$env:PATH"
 }
 
 Write-Host ""
@@ -69,4 +74,5 @@ Write-Host "✔ MiniGit CLI successfully installed to: $TargetExe" -ForegroundCo
 Write-Host ""
 Write-Host "You can now run:" -ForegroundColor White
 Write-Host "  minigit help" -ForegroundColor Cyan
+Write-Host "  minigit auth login" -ForegroundColor Cyan
 Write-Host "  minigit auth register --server https://<your-dokploy-server-url>" -ForegroundColor Cyan

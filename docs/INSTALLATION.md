@@ -24,12 +24,19 @@ To use immediately in your current terminal session without reopening it:
 export PATH="$HOME/.minigit/bin:$PATH"
 ```
 
-#### **Windows (PowerShell)**:
-```powershell
-irm https://raw.githubusercontent.com/Anirban-dev/Git/main/scripts/install.ps1 | iex
-```
-> Installed to: `%LOCALAPPDATA%\MiniGit\bin\minigit.exe`  
+#### **Windows**:
+
+- **From PowerShell**:
+  ```powershell
+  irm https://raw.githubusercontent.com/Anirban-dev/Git/main/scripts/install.ps1 | iex
+  ```
+- **From Command Prompt (cmd.exe)**:
+  ```cmd
+  powershell -c "irm https://raw.githubusercontent.com/Anirban-dev/Git/main/scripts/install.ps1 | iex"
+  ```
+> Installed to: `%LOCALAPPDATA%\MiniGit\bin\`  
 > Automatically configured in: Windows User Environment `PATH`.
+
 
 ---
 
