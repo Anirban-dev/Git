@@ -1,0 +1,3 @@
+# MiniGit Server & Client Build Requirements
+python-dotenv>=1.0.0
+pyinstaller>=6.0.0
