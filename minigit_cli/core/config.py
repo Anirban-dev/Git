@@ -1,8 +1,11 @@
 import os
 import json
-from dotenv import load_dotenv
 
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 GLOBAL_CREDENTIALS_FILE = os.path.expanduser("~/.minigit_credentials")
 
