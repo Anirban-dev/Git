@@ -77,9 +77,17 @@ fi
 
 chmod +x "$INSTALL_DIR/$EXECUTABLE_NAME"
 
-# 3. Add to PATH in Shell config files
+# 3. Add to PATH in Shell config files (handles Bash, Zsh, and default shells)
 PATH_LINE="export PATH=\"\$HOME/.minigit/bin:\$PATH\""
-UPDATED_SHELL=false
+UPDATED_PROFILES=()
+
+# Determine default user profile based on current shell if none exist
+DETECTED_SHELL=$(basename "${SHELL:-bash}")
+if [ "$DETECTED_SHELL" = "zsh" ] && [ ! -f "$HOME/.zshrc" ]; then
+    touch "$HOME/.zshrc"
+elif [ "$DETECTED_SHELL" = "bash" ] && [ ! -f "$HOME/.bashrc" ] && [ ! -f "$HOME/.bash_profile" ]; then
+    touch "$HOME/.bashrc"
+fi
 
 for PROFILE in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.profile" "$HOME/.bash_profile"; do
     if [ -f "$PROFILE" ]; then
@@ -87,19 +95,20 @@ for PROFILE in "$HOME/.bashrc" "$HOME/.zshrc" "$HOME/.profile" "$HOME/.bash_prof
             echo "" >> "$PROFILE"
             echo "# MiniGit CLI" >> "$PROFILE"
             echo "$PATH_LINE" >> "$PROFILE"
-            UPDATED_SHELL=true
+            UPDATED_PROFILES+=("$PROFILE")
         fi
     fi
 done
 
 echo ""
 echo -e "${GREEN}✔ MiniGit installed successfully to: ${INSTALL_DIR}/${EXECUTABLE_NAME}${NC}"
-echo ""
 
-if [ "$UPDATED_SHELL" = true ]; then
-    echo -e "${YELLOW}To start using minigit immediately in this terminal, run:${NC}"
+if [ ${#UPDATED_PROFILES[@]} -gt 0 ]; then
+    echo -e "${GREEN}✔ Configured PATH in: ${UPDATED_PROFILES[*]}${NC}"
+    echo ""
+    echo -e "${YELLOW}To use minigit in your current terminal session, run:${NC}"
     echo -e "  ${BLUE}export PATH=\"\$HOME/.minigit/bin:\$PATH\"${NC}"
-    echo -e "or restart your terminal."
+    echo -e "All future / newly opened terminal windows will work automatically."
 else
     echo -e "Make sure ${BLUE}\$HOME/.minigit/bin${NC} is in your ${BLUE}PATH${NC}."
 fi

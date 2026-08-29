@@ -52,29 +52,55 @@ if (-not $DownloadSuccess) {
     return
 }
 
-# 3. Create a wrapper batch/cmd script so 'minigit' always invokes minigit.exe even if minigit.py exists in current directory
+# 3. Create wrapper batch/cmd script
 Set-Content -Path $TargetCmd -Value "@echo off`r`n`"%~dp0minigit.exe`" %*" -Force
 
-# 4. Add to User PATH environment variable (ensure it's at the FRONT of PATH for priority)
-$UserPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::User)
-if ($UserPath -notlike "*$InstallDir*") {
-    # Prepend to User PATH
-    $NewUserPath = "$InstallDir;$UserPath"
-    [Environment]::SetEnvironmentVariable("Path", $NewUserPath, [EnvironmentVariableTarget]::User)
-    Write-Host "==> Added $InstallDir to User PATH." -ForegroundColor Green
-}
+# 4. Permanently update Windows Registry for User PATH and broadcast environment change
+$RegKey = [Microsoft.Win32.Registry]::CurrentUser.OpenSubKey("Environment", $true)
+$CurrentRawPath = $RegKey.GetValue("Path", "", [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
 
-# Update current session PATH so minigit works immediately in this window
+# Split and filter out existing occurrences of InstallDir
+$PathParts = $CurrentRawPath -split ";" | Where-Object { $_ -and $_ -ne $InstallDir }
+# Prepend InstallDir to the front
+$NewRawPath = ($InstallDir, $PathParts -join ";").Trim(";")
+
+# Save back to registry as ExpandString
+$RegKey.SetValue("Path", $NewRawPath, [Microsoft.Win32.RegistryValueKind]::ExpandString)
+$RegKey.Close()
+
+# Also set via .NET Environment as fallback
+[Environment]::SetEnvironmentVariable("Path", $NewRawPath, [EnvironmentVariableTarget]::User)
+
+# 5. Broadcast WM_SETTINGCHANGE message so Windows Explorer and newly spawned shells immediately see the new PATH
+try {
+    Add-Type -Namespace Win32 -Name NativeMethods -MemberDefinition @"
+[System.Runtime.InteropServices.DllImport("user32.dll", SetLastError = true, CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+public static extern System.IntPtr SendMessageTimeout(
+    System.IntPtr hWnd,
+    uint Msg,
+    System.UIntPtr wParam,
+    string lParam,
+    uint fuFlags,
+    uint uTimeout,
+    out System.UIntPtr lpdwResult);
+"@
+    $HWND_BROADCAST = [System.IntPtr]0xffff
+    $WM_SETTINGCHANGE = 0x001A
+    $SMTO_ABORTIFHUNG = 0x0002
+    $result = [System.UIntPtr]::Zero
+    [Win32.NativeMethods]::SendMessageTimeout($HWND_BROADCAST, $WM_SETTINGCHANGE, [System.UIntPtr]::Zero, "Environment", $SMTO_ABORTIFHUNG, 3000, [ref]$result) | Out-Null
+} catch {}
+
+# Update current session PATH so it works immediately in the current window too
 if ($env:PATH -notlike "*$InstallDir*") {
     $env:PATH = "$InstallDir;$env:PATH"
 }
 
 Write-Host ""
 Write-Host "✔ MiniGit CLI successfully installed to: $TargetExe" -ForegroundColor Green
+Write-Host "✔ PATH environment variable updated permanently in Windows Registry." -ForegroundColor Green
 Write-Host ""
 Write-Host "You can now run:" -ForegroundColor White
 Write-Host "  minigit help" -ForegroundColor Cyan
-Write-Host "  minigit auth register --server $env:MINIGIT_SERVER_URL" -ForegroundColor Cyan
 Write-Host "  minigit auth login" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "Tip: Set the MINIGIT_SERVER_URL environment variable to automatically default your server URL." -ForegroundColor Yellow
+Write-Host "  minigit auth register --server $env:MINIGIT_SERVER_URL" -ForegroundColor Cyan

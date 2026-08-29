@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 MiniGit CLI Tool
 Executable entry point for the MiniGit client.
