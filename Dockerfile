@@ -13,12 +13,12 @@ COPY minigit_server.py .
 # Create storage directory for repositories and database persistence
 RUN mkdir -p /app/storage/repos
 
-# Environment defaults
+# Environment defaults (override via Dokploy / Docker env vars)
 ENV MINIGIT_SERVER_HOST=0.0.0.0
 ENV MINIGIT_SERVER_PORT=3000
 ENV PYTHONUNBUFFERED=1
 
-EXPOSE 3000
+EXPOSE ${MINIGIT_SERVER_PORT}
 
 # Run the server
 CMD ["python", "minigit_server.py"]

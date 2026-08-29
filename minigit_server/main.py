@@ -1,4 +1,5 @@
 import sys
+import os
 import argparse
 from socketserver import ThreadingMixIn
 from http.server import HTTPServer
@@ -28,12 +29,17 @@ def run_server(host: str = "0.0.0.0", port: int = 3000):
         sys.exit(0)
 
 def main():
+    # Read defaults from environment variables (set these in Dokploy / Docker)
+    env_host = os.environ.get("MINIGIT_SERVER_HOST", "0.0.0.0")
+    env_port = int(os.environ.get("MINIGIT_SERVER_PORT", "3000"))
+
     parser = argparse.ArgumentParser(description="MiniGit Protocol & Auth Server")
-    parser.add_argument("--host", default="0.0.0.0", help="Host address (default: 0.0.0.0)")
-    parser.add_argument("--port", type=int, default=3000, help="Port number (default: 3000)")
+    parser.add_argument("--host", default=env_host, help=f"Host address (default: {env_host})")
+    parser.add_argument("--port", type=int, default=env_port, help=f"Port number (default: {env_port})")
     args = parser.parse_args()
 
     run_server(host=args.host, port=args.port)
 
 if __name__ == "__main__":
     main()
+
