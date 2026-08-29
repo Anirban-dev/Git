@@ -7,7 +7,7 @@ STORAGE_DIR = "./storage"
 REPOS_DIR = os.path.join(STORAGE_DIR, "repos")
 DB_FILE = os.path.join(STORAGE_DIR, "db.json")
 
-SECRET_KEY = os.environ.get("MINIGIT_SECRET_KEY", "").strip().strip("\"'")
+SECRET_KEY = os.environ.get("MINIGIT_SECRET_KEY")
 if not SECRET_KEY:
     raise ValueError(
         "MINIGIT_SECRET_KEY environment variable is required. "

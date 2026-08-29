@@ -1,12 +1,15 @@
 import os
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 GLOBAL_CREDENTIALS_FILE = os.path.expanduser("~/.minigit_credentials")
 
 # Environment variable configuration
 MINIGIT_SERVER_URL = os.environ.get("MINIGIT_SERVER_URL", "http://localhost:3000")
 MINIGIT_DEFAULT_BRANCH = os.environ.get("MINIGIT_DEFAULT_BRANCH", "main")
-MINIGIT_SECRET_KEY = os.environ.get("MINIGIT_SECRET_KEY", "minigit_super_secret_jwt_key_2026")
+MINIGIT_SECRET_KEY = os.environ.get("MINIGIT_SECRET_KEY")
 
 def load_global_credentials() -> dict:
     if os.path.isfile(GLOBAL_CREDENTIALS_FILE):
