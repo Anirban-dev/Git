@@ -1,18 +1,12 @@
 import os
 import json
-
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass
+from pathlib import Path
 
 GLOBAL_CREDENTIALS_FILE = os.path.expanduser("~/.minigit_credentials")
 
 # Environment variable configuration
-MINIGIT_SERVER_URL = os.environ.get("MINIGIT_SERVER_URL", "http://localhost:3000")
-MINIGIT_DEFAULT_BRANCH = os.environ.get("MINIGIT_DEFAULT_BRANCH", "main")
-MINIGIT_SECRET_KEY = os.environ.get("MINIGIT_SECRET_KEY")
+MINIGIT_SERVER_URL = "https://git.apcorp.binaryabyss.com/"
+MINIGIT_DEFAULT_BRANCH = "main"
 
 def load_global_credentials() -> dict:
     if os.path.isfile(GLOBAL_CREDENTIALS_FILE):
