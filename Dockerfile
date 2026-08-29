@@ -9,6 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy server and shared components
 COPY minigit_server/ ./minigit_server/
 COPY minigit_server.py .
+COPY .env ./.env
 
 # Create storage directory for repositories and database persistence
 RUN mkdir -p /app/storage/repos
