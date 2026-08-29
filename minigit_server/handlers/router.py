@@ -66,7 +66,7 @@ class MiniGitRequestHandler(BaseHTTPRequestHandler):
                     "login": "minigit auth login",
                     "init": "minigit init my-repo",
                     "commit": "minigit commit -m 'Initial commit'",
-                    "remote": "minigit remote add origin http://localhost:3000/repos/<user>/<repo> --create",
+                    "remote": "minigit remote add origin $MINIGIT_SERVER_URL/repos/<user>/<repo> --create",
                     "push": "minigit push"
                 }
             })

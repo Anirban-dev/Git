@@ -82,7 +82,7 @@ minigit diff
 
 ### Configure Remote Repository:
 ```bash
-minigit remote add origin http://localhost:3000/repos/<username>/my-app --create
+minigit remote add origin $MINIGIT_SERVER_URL/repos/<username>/my-app --create
 ```
 
 ### Push Local Commits to Server:
@@ -92,7 +92,7 @@ minigit push
 
 ### Clone Remote Repository:
 ```bash
-minigit clone http://localhost:3000/repos/<username>/my-app cloned-app
+minigit clone $MINIGIT_SERVER_URL/repos/<username>/my-app cloned-app
 ```
 
 ### Pull Latest Changes:

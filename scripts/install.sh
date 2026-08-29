@@ -107,4 +107,5 @@ fi
 echo ""
 echo "Try running:"
 echo "  minigit help"
-echo "  minigit auth register --server https://<your-dokploy-server-url>"
+echo "  minigit auth register --server \$MINIGIT_SERVER_URL"
+echo "  minigit auth login"

@@ -23,7 +23,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     # Auth
     p_auth = subparsers.add_parser("auth", help="User authentication management")
-    p_auth.add_argument("--server", help="Server URL (default: http://localhost:3000)")
+    p_auth.add_argument("--server", help="Server URL (default: from $MINIGIT_SERVER_URL or http://localhost:3000)")
     auth_sub = p_auth.add_subparsers(dest="auth_cmd")
     auth_sub.add_parser("register", help="Register a new user account")
     auth_sub.add_parser("login", help="Log in to account")

@@ -74,5 +74,7 @@ Write-Host "✔ MiniGit CLI successfully installed to: $TargetExe" -ForegroundCo
 Write-Host ""
 Write-Host "You can now run:" -ForegroundColor White
 Write-Host "  minigit help" -ForegroundColor Cyan
+Write-Host "  minigit auth register --server $env:MINIGIT_SERVER_URL" -ForegroundColor Cyan
 Write-Host "  minigit auth login" -ForegroundColor Cyan
-Write-Host "  minigit auth register --server https://<your-dokploy-server-url>" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "Tip: Set the MINIGIT_SERVER_URL environment variable to automatically default your server URL." -ForegroundColor Yellow

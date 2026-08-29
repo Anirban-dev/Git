@@ -6,8 +6,6 @@ import json
 from ..core.config import load_global_credentials, save_global_credentials, clear_global_credentials, get_server_url
 from ..remote.client import register_user, login_user, verify_otp
 
-DEFAULT_SERVER_URL = "http://localhost:3000"
-
 def cmd_auth(args):
     sub = args.auth_cmd
     server_url = args.server or get_server_url()
