@@ -29,7 +29,7 @@ jobs:
             pyinstaller_args: --onefile --name minigit-linux-x86_64 minigit.py
           - os: macos
             arch: x86_64
-            runner: macos-13
+            runner: macos-latest
             artifact_name: minigit-macos-x86_64
             pyinstaller_args: --onefile --name minigit-macos-x86_64 minigit.py
           - os: macos
