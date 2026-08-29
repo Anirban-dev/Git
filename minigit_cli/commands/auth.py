@@ -3,12 +3,12 @@ import getpass
 import os
 import time
 import json
-from ..core.config import load_global_credentials, save_global_credentials, clear_global_credentials, get_server_url
+from ..core.config import load_global_credentials, save_global_credentials, clear_global_credentials, get_server_url, validate_server_url
 from ..remote.client import register_user, login_user, verify_otp
 
 def cmd_auth(args):
     sub = args.auth_cmd
-    server_url = args.server or get_server_url()
+    server_url = validate_server_url(getattr(args, "server", None))
 
     if sub == "register":
         username = input("Username: ").strip()

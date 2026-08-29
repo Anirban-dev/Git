@@ -48,9 +48,24 @@ def save_local_config(repo_path: str, data: dict):
     with open(cfg_file, "w", encoding="utf-8") as f:
         json.dump(existing, f, indent=2)
 
+def validate_server_url(url: str | None) -> str:
+    """
+    Validate and return the server URL.
+    Requires an explicit http:// or https:// protocol.
+    """
+    if not url:
+        url = os.environ.get("MINIGIT_SERVER_URL", MINIGIT_SERVER_URL)
+    
+    url = url.strip()
+    if not url.startswith("https://") and not url.startswith("http://"):
+        raise ValueError(
+            f"Invalid server URL '{url}'. Server URL must include protocol (e.g. 'https://{url}')."
+        )
+    return url.rstrip('/')
+
 def get_server_url() -> str:
-    """Get the server URL from environment variable or default."""
-    return MINIGIT_SERVER_URL
+    """Get the validated server URL from environment variable or default."""
+    return validate_server_url(os.environ.get("MINIGIT_SERVER_URL", MINIGIT_SERVER_URL))
 
 def get_default_branch() -> str:
     """Get the default branch name from environment variable or default."""

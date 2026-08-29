@@ -70,16 +70,22 @@ MiniGit CLI and Server respect the following environment variables:
 
 ### 1. User Authentication
 
+The CLI uses the `MINIGIT_SERVER_URL` environment variable by default, or you can pass `--server <url>` to any command (protocols like `https://` are automatically prepended if omitted).
+
 #### Register a New Account (with Email OTP)
 ```bash
-# Uses $MINIGIT_SERVER_URL or specify --server directly
+# Uses $MINIGIT_SERVER_URL, or pass --server
 minigit auth register
+# OR
+minigit auth register --server git.yourdomain.com
 ```
 *Prompts for username, email, and password. An OTP will be emailed to verify your account.*
 
 #### Log In
 ```bash
 minigit auth login
+# OR
+minigit auth login --server git.yourdomain.com
 ```
 
 #### Check Authentication Status
