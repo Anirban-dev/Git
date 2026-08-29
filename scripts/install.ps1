@@ -1,8 +1,6 @@
 # MiniGit Standalone Client Installer for Windows (PowerShell)
 # Usage: irm https://raw.githubusercontent.com/Anirban-dev/Git/main/scripts/install.ps1 | iex
 
-$ErrorActionPreference = "Stop"
-
 $Repo = "Anirban-dev/Git"
 $InstallDir = "$env:LOCALAPPDATA\MiniGit\bin"
 $BinaryName = "minigit-windows-x86_64.exe"
@@ -17,27 +15,40 @@ if (-not (Test-Path $InstallDir)) {
 
 # 2. Download latest binary from GitHub Releases
 $DownloadUrl = "https://github.com/$Repo/releases/latest/download/$BinaryName"
-
 Write-Host "==> Downloading from: $DownloadUrl" -ForegroundColor Cyan
+
+$DownloadSuccess = $false
 
 try {
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    Invoke-WebRequest -Uri $DownloadUrl -OutFile $TargetExe -UseBasicParsing
+    Invoke-WebRequest -Uri $DownloadUrl -OutFile $TargetExe -UseBasicParsing -ErrorAction Stop
+    $DownloadSuccess = $true
 } catch {
-    Write-Host "Direct download failed, querying latest release API..." -ForegroundColor Yellow
+    Write-Host "Direct download failed, querying latest GitHub release assets..." -ForegroundColor Yellow
     try {
         $ReleaseApi = "https://api.github.com/repos/$Repo/releases/latest"
-        $ReleaseJson = Invoke-RestMethod -Uri $ReleaseApi -UseBasicParsing
+        $ReleaseJson = Invoke-RestMethod -Uri $ReleaseApi -UseBasicParsing -ErrorAction Stop
         $Asset = $ReleaseJson.assets | Where-Object { $_.name -like "*windows*.exe" -or $_.name -like "*minigit*.exe" } | Select-Object -First 1
         if ($Asset) {
-            Invoke-WebRequest -Uri $Asset.browser_download_url -OutFile $TargetExe -UseBasicParsing
+            Write-Host "Found asset: $($Asset.name). Downloading..." -ForegroundColor Cyan
+            Invoke-WebRequest -Uri $Asset.browser_download_url -OutFile $TargetExe -UseBasicParsing -ErrorAction Stop
+            $DownloadSuccess = $true
         } else {
-            throw "No Windows binary found in latest release assets."
+            Write-Host "No Windows binary found in the latest release assets." -ForegroundColor Red
         }
     } catch {
-        Write-Host "Error: Failed to download MiniGit binary. Please verify that a release exists at https://github.com/$Repo/releases" -ForegroundColor Red
-        Exit 1
+        Write-Host "Error: No release found yet on https://github.com/$Repo/releases" -ForegroundColor Red
     }
+}
+
+if (-not $DownloadSuccess) {
+    Write-Host ""
+    Write-Host "==========================================================================" -ForegroundColor Red
+    Write-Host " MiniGit binary could not be downloaded." -ForegroundColor Red
+    Write-Host " Please make sure GitHub Actions has finished building the release assets" -ForegroundColor Yellow
+    Write-Host " at: https://github.com/$Repo/actions" -ForegroundColor Yellow
+    Write-Host "==========================================================================" -ForegroundColor Red
+    return
 }
 
 # 3. Add to User PATH environment variable if not already present
