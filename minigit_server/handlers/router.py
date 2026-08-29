@@ -3,6 +3,7 @@ import urllib.parse
 from http.server import BaseHTTPRequestHandler
 from ..db import db
 from ..auth import hash_password, verify_password, generate_jwt, authenticate_request
+from ..email import send_otp_email
 from ..git_engine import (
     ensure_server_repo,
     store_raw_object,
@@ -183,7 +184,7 @@ class MiniGitRequestHandler(BaseHTTPRequestHandler):
         except Exception:
             body = {}
 
-        # 1. Auth: Register
+        # 1. Auth: Register - Initiate registration and send OTP (does not create active user yet)
         if path == "/api/auth/register":
             username = body.get("username", "").strip()
             email = body.get("email", "").strip()
@@ -201,11 +202,58 @@ class MiniGitRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(400, {"error": f"Email '{email}' already registered"})
                 return
 
+            # Generate OTP for email verification
+            import secrets
+            import threading
+            otp_code = f"{secrets.randbelow(900000) + 100000:06d}"  # 6-digit OTP
             pwd_hash = hash_password(password)
-            user = db.create_user(username, email, pwd_hash)
-            token = generate_jwt({"user_id": user["id"], "username": user["username"]})
+
+            # Store in pending registrations (will only become active upon OTP verification)
+            db.create_pending_user(username, email, pwd_hash, otp_code)
+
+            # Send OTP via email in a background thread so the HTTP request never blocks or times out
+            def _async_send():
+                success = send_otp_email(email, otp_code)
+                if not success:
+                    print(f"\n[SERVER OTP BACKUP] For email '{email}', the OTP is: {otp_code}\n")
+
+            threading.Thread(target=_async_send, daemon=True).start()
 
             self._send_json(200, {
+                "status": "pending_verification",
+                "email": email,
+                "username": username,
+                "otp_message": "OTP has been sent to your email. Please verify to complete registration.",
+                "email_sent": "queued"
+            })
+            return
+
+        # 3. Auth: Verify OTP and finalize registration
+        if path == "/api/auth/otp/verify":
+            email = body.get("email", "").strip()
+            otp_code = body.get("otp_code", "").strip()
+
+            if not email or not otp_code:
+                self._send_json(400, {"error": "email and otp_code required"})
+                return
+
+            # Activate user from pending state
+            user = db.activate_pending_user(email, otp_code)
+            if not user:
+                # If OTP failed, remove any pending user registration for this email
+                db.delete_pending_user(email)
+                # Fallback: check standard OTP verification for existing users if any
+                if db.verify_otp(email, otp_code):
+                    self._send_json(200, {"status": "OTP verified", "otp_verified": True})
+                    return
+                self._send_json(400, {"error": "Invalid or expired OTP code"})
+                return
+
+            # Generate JWT token now that user is officially verified & created
+            token = generate_jwt({"user_id": user["id"], "username": user["username"]})
+            self._send_json(200, {
+                "status": "OTP verified",
+                "otp_verified": True,
                 "token": token,
                 "user": {"id": user["id"], "username": user["username"], "email": user["email"]}
             })

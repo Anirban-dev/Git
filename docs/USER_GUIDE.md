@@ -31,9 +31,7 @@ minigit auth status
 ```
 
 ### Generate a Personal Access Token (PAT):
-```bash
-minigit auth token
-```
+*Removed - use `minigit auth login` to authenticate instead*
 
 ---
 
@@ -101,4 +99,9 @@ minigit clone http://localhost:3000/repos/<username>/my-app cloned-app
 ```bash
 cd cloned-app
 minigit pull
+```
+
+### Show Help for All Commands:
+```bash
+minigit help
 ```

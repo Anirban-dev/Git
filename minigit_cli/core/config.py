@@ -3,6 +3,11 @@ import json
 
 GLOBAL_CREDENTIALS_FILE = os.path.expanduser("~/.minigit_credentials")
 
+# Environment variable configuration
+MINIGIT_SERVER_URL = os.environ.get("MINIGIT_SERVER_URL", "http://localhost:3000")
+MINIGIT_DEFAULT_BRANCH = os.environ.get("MINIGIT_DEFAULT_BRANCH", "main")
+MINIGIT_SECRET_KEY = os.environ.get("MINIGIT_SECRET_KEY", "minigit_super_secret_jwt_key_2026")
+
 def load_global_credentials() -> dict:
     if os.path.isfile(GLOBAL_CREDENTIALS_FILE):
         try:
@@ -42,3 +47,11 @@ def save_local_config(repo_path: str, data: dict):
     existing.update(data)
     with open(cfg_file, "w", encoding="utf-8") as f:
         json.dump(existing, f, indent=2)
+
+def get_server_url() -> str:
+    """Get the server URL from environment variable or default."""
+    return MINIGIT_SERVER_URL
+
+def get_default_branch() -> str:
+    """Get the default branch name from environment variable or default."""
+    return MINIGIT_DEFAULT_BRANCH

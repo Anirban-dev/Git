@@ -13,7 +13,8 @@ from ..core.objects import read_object, parse_commit
 from ..core.config import (
     load_global_credentials,
     load_local_config,
-    save_local_config
+    save_local_config,
+    get_server_url
 )
 from ..remote.client import (
     create_remote_repo,
@@ -21,8 +22,6 @@ from ..remote.client import (
     pull_from_remote
 )
 from ..remote.protocol import collect_objects_for_commit, write_objects_to_repo
-
-DEFAULT_SERVER_URL = "http://localhost:3000"
 
 def cmd_remote(args):
     repo_path = find_repo_root()
@@ -47,8 +46,7 @@ def cmd_remote(args):
         print(f"Remote '{name}' set to {url}")
 
         if getattr(args, "create", False):
-            creds = load_global_credentials()
-            server_url = creds.get("server", DEFAULT_SERVER_URL)
+            server_url = get_server_url()
             repo_name = url.split("/")[-1]
             try:
                 res = create_remote_repo(server_url, repo_name)

@@ -27,18 +27,24 @@ def http_request(url: str, method: str = "GET", data: dict | None = None, token:
     req = urllib.request.Request(url, data=body_bytes, headers=headers, method=method)
 
     try:
-        with urllib.request.urlopen(req) as resp:
+        with urllib.request.urlopen(req, timeout=15) as resp:
             resp_body = resp.read().decode("utf-8")
             if resp_body:
                 return json.loads(resp_body)
             return {}
     except urllib.error.HTTPError as e:
-        error_msg = e.read().decode("utf-8")
+        server_error = None
         try:
-            err_json = json.loads(error_msg)
-            raise RuntimeError(err_json.get("error") or err_json.get("message") or f"HTTP {e.code}")
+            raw_body = e.read()
+            if raw_body:
+                err_json = json.loads(raw_body.decode("utf-8"))
+                server_error = err_json.get("error") or err_json.get("message")
         except Exception:
-            raise RuntimeError(f"HTTP {e.code}: {e.reason}")
+            pass
+
+        if server_error:
+            raise RuntimeError(server_error)
+        raise RuntimeError(f"HTTP {e.code}: {e.reason}")
     except urllib.error.URLError as e:
         raise RuntimeError(f"Connection failed to {url}: {e.reason}")
 
@@ -84,3 +90,11 @@ def pull_from_remote(remote_url: str, branch: str = "main") -> dict:
 def fetch_remote_info(remote_url: str) -> dict:
     endpoint = f"{remote_url.rstrip('/')}/info"
     return http_request(endpoint, method="GET")
+
+def verify_otp(server_url: str, email: str, otp_code: str) -> dict:
+    """Verify OTP code with the server."""
+    endpoint = f"{server_url.rstrip('/')}/api/auth/otp/verify"
+    return http_request(endpoint, method="POST", data={
+        "email": email,
+        "otp_code": otp_code
+    }, token=None)  # OTP verification is a public endpoint

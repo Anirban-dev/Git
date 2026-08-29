@@ -1,5 +1,6 @@
 import sys
 import argparse
+import os
 from .commands.auth import cmd_auth
 from .commands.local import (
     cmd_init,
@@ -28,7 +29,9 @@ def build_parser() -> argparse.ArgumentParser:
     auth_sub.add_parser("login", help="Log in to account")
     auth_sub.add_parser("logout", help="Log out")
     auth_sub.add_parser("status", help="Show authentication status")
-    auth_sub.add_parser("token", help="Generate Personal Access Token")
+
+    # Help command - lists all available commands
+    p_help = subparsers.add_parser("help", help="Show help for all available commands")
 
     # Local repository commands
     p_init = subparsers.add_parser("init", help="Initialize a new repository")
@@ -85,6 +88,7 @@ def main():
         "push": cmd_push,
         "pull": cmd_pull,
         "clone": cmd_clone,
+        "help": cmd_help,
     }
 
     handler = handlers.get(args.command)
@@ -96,6 +100,40 @@ def main():
             sys.exit(1)
     else:
         parser.print_help()
+
+def cmd_help(args):
+    """Show help for all available MiniGit commands."""
+    print("MiniGit - Version Control System")
+    print("=" * 50)
+    print()
+    print("Available commands:")
+    print()
+    print("Authentication:")
+    print("  minigit auth register    - Register a new user account")
+    print("  minigit auth login       - Log in to your account")
+    print("  minigit auth logout      - Log out")
+    print("  minigit auth status      - Show authentication status")
+    print()
+    print("Local Repository:")
+    print("  minigit init             - Initialize a new repository")
+    print("  minigit add <files>      - Add files to the index")
+    print("  minigit commit -m <msg>  - Record changes to the repository")
+    print("  minigit status           - Show working tree status")
+    print("  minigit log              - Show commit logs")
+    print("  minigit diff             - Show line-by-line diffs")
+    print()
+    print("Remote:")
+    print("  minigit remote add <name> <url>  - Add a remote repository")
+    print("  minigit push [remote] [branch]   - Push commits to remote")
+    print("  minigin pull [remote]            - Pull from remote")
+    print("  minigin clone <url> [dir]        - Clone a remote repository")
+    print()
+    print("Other:")
+    print("  minigit help                 - Show this help message")
+    print("  minigit <command> --help       - Show help for a specific command")
+    print()
+    sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

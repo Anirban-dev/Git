@@ -16,7 +16,14 @@ Returns server status and CLI quickstart guide.
   "version": "2.0.0",
   "status": "online",
   "cli_download": "minigit",
-  "quickstart": { ... }
+  "quickstart": {
+    "register": "minigit auth register",
+    "login": "minigit auth login",
+    "init": "minigit init my-repo",
+    "commit": "minigit commit -m 'Initial commit'",
+    "remote": "minigit remote add origin http://localhost:3000/repos/<user>/<repo> --create",
+    "push": "minigit push"
+  }
 }
 ```
 
@@ -25,7 +32,7 @@ Returns server status and CLI quickstart guide.
 ## 2. Authentication Endpoints
 
 ### `POST /api/auth/register`
-Registers a new user account.
+Registers a new user account with OTP verification.
 
 **Request Body:**
 ```json
@@ -44,9 +51,13 @@ Registers a new user account.
     "id": "uuid",
     "username": "alice",
     "email": "alice@example.com"
-  }
+  },
+  "otp_verified": false,
+  "otp_message": "OTP has been sent to your email. Please verify to complete registration."
 }
 ```
+
+To complete registration, you must verify the OTP sent to your email using the `POST /api/auth/otp/verify` endpoint.
 
 ---
 
@@ -78,10 +89,26 @@ Generates a new Personal Access Token (`mgp_...`). Requires Bearer token.
 }
 ```
 
+**Response (200 OK):**
+```json
+{
+  "id": "token-uuid",
+  "token": "mgp_abcdef1234567890abcd",
+  "name": "CI/CD Token"
+}
+```
+
 ---
 
 ### `DELETE /api/auth/tokens/<id>`
 Revokes a Personal Access Token.
+
+**Response (200 OK):**
+```json
+{
+  "status": "revoked"
+}
+```
 
 ---
 
