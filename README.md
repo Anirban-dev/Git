@@ -60,9 +60,9 @@ MiniGit CLI and Server respect the following environment variables:
 | `EMAIL_PASS` | Server | Gmail App Password for SMTP authentication | *(Optional)* |
 
 > 💡 **Setting your default server URL:**
-> - **Linux / macOS**: `export MINIGIT_SERVER_URL="https://git.yourdomain.com"` (add to `~/.bashrc` or `~/.zshrc`)
-> - **Windows (PowerShell)**: `[Environment]::SetEnvironmentVariable("MINIGIT_SERVER_URL", "https://git.yourdomain.com", "User")`
-> - **Windows (CMD)**: `setx MINIGIT_SERVER_URL "https://git.yourdomain.com"`
+> - **Linux / macOS**: `export MINIGIT_SERVER_URL="https://git.apcorp.bynaryabyss.com"` (add to `~/.bashrc` or `~/.zshrc`)
+> - **Windows (PowerShell)**: `[Environment]::SetEnvironmentVariable("MINIGIT_SERVER_URL", "https://git.apcorp.bynaryabyss.com", "User")`
+> - **Windows (CMD)**: `setx MINIGIT_SERVER_URL "https://git.apcorp.bynaryabyss.com"`
 
 ---
 
@@ -77,7 +77,7 @@ The CLI uses the `MINIGIT_SERVER_URL` environment variable by default, or you ca
 # Uses $MINIGIT_SERVER_URL, or pass --server
 minigit auth register
 # OR
-minigit auth register --server git.yourdomain.com
+minigit auth register --server https://git.apcorp.bynaryabyss.com
 ```
 *Prompts for username, email, and password. An OTP will be emailed to verify your account.*
 
@@ -85,7 +85,7 @@ minigit auth register --server git.yourdomain.com
 ```bash
 minigit auth login
 # OR
-minigit auth login --server git.yourdomain.com
+minigit auth login --server https://git.apcorp.bynaryabyss.com
 ```
 
 #### Check Authentication Status
@@ -135,7 +135,7 @@ minigit diff
 
 #### Add Remote and Auto-Create on Server
 ```bash
-# If MINIGIT_SERVER_URL is set to https://git.yourdomain.com:
+# If MINIGIT_SERVER_URL is set to https://git.apcorp.bynaryabyss.com:
 minigit remote add origin $MINIGIT_SERVER_URL/repos/<username>/my-project --create
 ```
 

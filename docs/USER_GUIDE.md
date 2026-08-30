@@ -15,28 +15,28 @@ python minigit_server.py --port 3000
 
 ## 2. User Authentication
 
-The CLI uses the `MINIGIT_SERVER_URL` environment variable by default, or you can supply `--server <url>` directly (protocols like `https://` are automatically added if omitted).
+The CLI uses the `MINIGIT_SERVER_URL` environment variable by default, or you can supply `--server <url>`.
 
 ### Register a New Account (with Email OTP):
 ```bash
 # Uses $MINIGIT_SERVER_URL, or pass --server
 minigit auth register
 # OR
-minigit auth register --server git.yourdomain.com
+minigit auth register --server https://git.yourdomain.com
 ```
 
 ### Log In to Existing Account:
 ```bash
 minigit auth login
 # OR
-minigit auth login --server git.yourdomain.com
+minigit auth login --server https://git.yourdomain.com
 ```
 
 ### Check Authentication Status:
 ```bash
 minigit auth status
 # OR
-minigit auth status --server git.yourdomain.com
+minigit auth status --server https://git.yourdomain.com
 ```
 
 ### Log Out (Clears Saved Credentials):
